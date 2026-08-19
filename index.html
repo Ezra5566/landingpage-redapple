@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>REDAPPLEKE — Premium Apple Products for Kenya</title>
+  <meta name="description" content="Genuine Apple products delivered across Kenya. iPhones, iPads, Macs, AirPods and accessories.">
+  <link rel="icon" href="logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+  <style>
+    /* ═══════════════════════════════════════════
+       PROPERTIES
+       ═══════════════════════════════════════════ */
+    :root {
+      --ease: cubic-bezier(0.23, 1, 0.32, 1);
+      --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --red: #dc2626; --red-l: #ef4444; --red-d: #991b1b;
+      --red-glow: rgba(220,38,38,0.35);
+    }
+    [data-theme="dark"] {
+      --bg: #000; --bg2: #050505;
+      --t: #fff; --t2: #a3a3a3; --t3: #737373;
+      --b: rgba(255,255,255,0.06); --bh: rgba(255,255,255,0.12);
+      --card: rgba(255,255,255,0.03); --cardb: rgba(255,255,255,0.06);
+      --glass: rgba(0,0,0,0.6); --glassb: rgba(255,255,255,0.08);
+    }
+    [data-theme="light"] {
+      --bg: #fff; --bg2: #fafafa;
+      --t: #000; --t2: #525252; --t3: #737373;
+      --b: rgba(0,0,0,0.06); --bh: rgba(0,0,0,0.12);
+      --card: rgba(0,0,0,0.02); --cardb: rgba(0,0,0,0.06);
+      --glass: rgba(255,255,255,0.6); --glassb: rgba(0,0,0,0.08);
+    }
+
+    /* ═══ RESET ═══ */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: auto; } /* GSAP handles smooth scroll */
+    body { font-family: var(--font); background: var(--bg); color: var(--t); overflow-x: hidden; -webkit-font-smoothing: antialiased; transition: background 0.6s, color 0.6s; }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--red); border-radius: 3px; }
+
+    /* ═══ SVG ICON SYSTEM ═══ */
+    .icon { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: -0.125em; }
+    .icon-sm { width: 0.875em; height: 0.875em; }
+    .icon-lg { width: 1.25em; height: 1.25em; }
+
+    /* ═══ LOADER ═══ */
+    .loader { position: fixed; inset: 0; z-index: 10000; background: #000; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1.5rem; }
+    .loader-logo { width: 50px; height: 50px; }
+    .loader-logo img { width: 100%; height: 100%; object-fit: contain; filter: brightness(0) invert(1); }
+    .loader-bar { width: 120px; height: 2px; background: rgba(255,255,255,0.1); border-radius: 1px; overflow: hidden; }
+    .loader-fill { width: 0%; height: 100%; background: var(--red); border-radius: 1px; }
+
+    /* ═══ CURSOR ═══ */
+    .cur { position: fixed; width: 8px; height: 8px; border-radius: 50%; background: var(--red); pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); mix-blend-mode: difference; transition: width 0.35s var(--ease-spring), height 0.35s var(--ease-spring), background 0.3s; }
+    .cur.big { width: 52px; height: 52px; background: rgba(220,38,38,0.12); border: 1.5px solid var(--red); }
+    @media (hover: none) { .cur { display: none; } }
+
+    /* ═══ NAV ═══ */
+    .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 0 clamp(1.5rem,4vw,3rem); height: 56px; display: flex; align-items: center; justify-content: space-between; background: var(--glass); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid transparent; transition: border-color 0.4s, background 0.6s; }
+    .nav.scrolled { border-bottom-color: var(--glassb); }
+    .nav-logo { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 1rem; letter-spacing: -0.02em; }
+    .nav-logo img { height: 26px; transition: filter 0.6s; }
+    [data-theme="dark"] .nav-logo img { filter: brightness(0) invert(1); }
+    .nav-r { display: flex; align-items: center; gap: 0.6rem; }
+    .theme-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--bh); background: transparent; color: var(--t); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s var(--ease-spring), background 0.4s; }
+    .theme-btn:hover { background: var(--b); }
+    .theme-btn:active { transform: scale(0.85); }
+    .shop-btn { padding: 0.4rem 1rem; border-radius: 980px; background: var(--red); color: #fff; font-weight: 600; font-size: 0.78rem; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; transition: transform 0.2s var(--ease-spring), background 0.3s; }
+    .shop-btn:hover { background: var(--red-d); }
+    .shop-btn:active { transform: scale(0.93); }
+
+    /* ═══ HERO ═══ */
+    .hero { position: relative; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 100px 2rem 60px; overflow: hidden; }
+    .hero-grid { position: absolute; inset: 0; opacity: 0.25; background-image: linear-gradient(var(--b) 1px, transparent 1px), linear-gradient(90deg, var(--b) 1px, transparent 1px); background-size: 80px 80px; mask-image: radial-gradient(ellipse 55% 45% at 50% 40%, black 15%, transparent 65%); -webkit-mask-image: radial-gradient(ellipse 55% 45% at 50% 40%, black 15%, transparent 65%); }
+    .orb { position: absolute; border-radius: 50%; filter: blur(100px); pointer-events: none; }
+    .orb-1 { width: 500px; height: 500px; background: var(--red-glow); opacity: 0.2; top: 5%; left: 50%; transform: translateX(-50%); }
+    .orb-2 { width: 300px; height: 300px; background: rgba(220,38,38,0.12); opacity: 0.25; bottom: 15%; right: 8%; }
+    .orb-3 { width: 200px; height: 200px; background: rgba(220,38,38,0.08); opacity: 0.2; top: 35%; left: 5%; }
+    .particles { position: absolute; inset: 0; pointer-events: none; }
+    .particle { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: var(--red); opacity: 0; }
+
+    .hero-content { position: relative; z-index: 2; max-width: 900px; }
+    .hero-eye { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.25em; color: var(--red); margin-bottom: 1.5rem; opacity: 0; }
+    .hero-title { font-size: clamp(3rem,8vw,7.5rem); font-weight: 900; line-height: 0.92; letter-spacing: -0.04em; margin-bottom: 1.5rem; }
+    .hero-title .line { display: block; overflow: hidden; padding-bottom: 0.05em; }
+    .hero-title .line span { display: inline-block; transform: translateY(115%); }
+    .hero-title .accent { background: linear-gradient(135deg, var(--red), var(--red-l), var(--red-d)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero-sub { font-size: clamp(0.95rem,1.8vw,1.2rem); color: var(--t2); max-width: 500px; margin: 0 auto 2.5rem; line-height: 1.65; opacity: 0; }
+    .hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; opacity: 0; }
+    .btn-p { padding: 0.85rem 2rem; border-radius: 980px; background: var(--red); color: #fff; font-weight: 600; font-size: 0.95rem; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; transition: transform 0.2s var(--ease-spring), background 0.3s, box-shadow 0.4s; box-shadow: 0 0 0 0 var(--red-glow); }
+    .btn-p:hover { background: var(--red-d); box-shadow: 0 0 40px 10px var(--red-glow); }
+    .btn-p:active { transform: scale(0.95); }
+    .btn-p .arr { transition: transform 0.25s var(--ease); }
+    .btn-p:hover .arr { transform: translateX(4px); }
+    .btn-s { padding: 0.85rem 2rem; border-radius: 980px; background: transparent; color: var(--t); font-weight: 600; font-size: 0.95rem; cursor: pointer; border: 1.5px solid var(--bh); display: inline-flex; align-items: center; gap: 0.5rem; transition: transform 0.2s var(--ease-spring), background 0.3s; }
+    .btn-s:hover { background: var(--b); }
+    .btn-s:active { transform: scale(0.95); }
+
+    .hero-product { position: relative; z-index: 2; margin-top: 3rem; opacity: 0; perspective: 1000px; }
+    .hero-product img { max-width: min(460px, 72vw); height: auto; filter: drop-shadow(0 40px 80px rgba(220,38,38,0.18)) drop-shadow(0 20px 40px rgba(0,0,0,0.35)); transition: transform 0.5s var(--ease); }
+    @media (hover: hover) { .hero-product:hover img { transform: translateY(-8px) scale(1.02); } }
+    .float-badge { position: absolute; padding: 0.45rem 0.9rem; border-radius: 10px; background: var(--glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--glassb); font-size: 0.7rem; font-weight: 600; white-space: nowrap; opacity: 0; box-shadow: 0 8px 32px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 0.4rem; }
+    .float-badge.b1 { top: 8%; right: -5%; }
+    .float-badge.b2 { bottom: 18%; left: -8%; }
+    .float-badge.b3 { top: 48%; right: -14%; }
+
+    .scroll-cue { position: absolute; bottom: 1.5rem; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 0.3rem; color: var(--t3); font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0; }
+    .scroll-cue::after { content: ''; width: 1px; height: 32px; background: linear-gradient(to bottom, var(--t3), transparent); }
+
+    /* ═══ SECTION SHARED ═══ */
+    .sec-pad { padding: clamp(5rem,12vw,10rem) 2rem; }
+    .sec-hdr { text-align: center; margin-bottom: clamp(3rem,6vw,5rem); }
+    .sec-eye { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.25em; color: var(--red); margin-bottom: 0.75rem; }
+    .sec-title { font-size: clamp(2rem,4vw,3.5rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
+
+    /* ═══ STATEMENT ═══ */
+    .statement { padding: clamp(5rem,12vw,10rem) 2rem; text-align: center; position: relative; overflow: hidden; }
+    .statement-bg { position: absolute; inset: 0; opacity: 0.025; font-size: clamp(8rem,20vw,20rem); font-weight: 900; display: flex; align-items: center; justify-content: center; letter-spacing: -0.05em; pointer-events: none; user-select: none; color: var(--t); }
+    .statement-text { position: relative; z-index: 2; font-size: clamp(1.6rem,4vw,3.8rem); font-weight: 800; line-height: 1.15; letter-spacing: -0.03em; max-width: 1000px; margin: 0 auto; }
+    .statement-text .word { display: inline-block; opacity: 0; transform: translateY(25px); }
+    .statement-text .red { color: var(--red); }
+
+    /* ═══ MARQUEE ═══ */
+    .marquee-wrap { padding: clamp(2rem,5vw,3.5rem) 0; overflow: hidden; border-top: 1px solid var(--b); border-bottom: 1px solid var(--b); }
+    .marquee { display: flex; width: max-content; }
+    .marquee span { flex-shrink: 0; padding: 0 clamp(1.5rem,3vw,3rem); font-size: clamp(1.1rem,2.5vw,2rem); font-weight: 800; letter-spacing: -0.02em; white-space: nowrap; color: var(--t3); display: flex; align-items: center; gap: 1.2rem; }
+    .marquee .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--red); flex-shrink: 0; }
+
+    /* ═══ STATS ═══ */
+    .stats { padding: clamp(4rem,10vw,8rem) 2rem; background: var(--bg2); transition: background 0.6s; }
+    .stats-grid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; }
+    .stat-card { text-align: center; padding: 2.2rem 1.2rem; border-radius: 18px; background: var(--card); border: 1px solid var(--cardb); opacity: 0; transform: translateY(30px); transition: background 0.6s, border-color 0.6s; }
+    .stat-num { font-size: clamp(2.2rem,5vw,3.2rem); font-weight: 900; letter-spacing: -0.03em; line-height: 1; margin-bottom: 0.35rem; background: linear-gradient(135deg, var(--red), var(--red-l)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .stat-lbl { font-size: 0.85rem; color: var(--t2); font-weight: 500; }
+    @media (hover: hover) { .stat-card:hover { transform: translateY(-3px); border-color: var(--bh); } }
+
+    /* ═══ FEATURES ═══ */
+    .feat-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.1rem; }
+    .feat-card { padding: 2rem; border-radius: 18px; background: var(--card); border: 1px solid var(--cardb); position: relative; overflow: hidden; opacity: 0; transform: translateY(30px); transition: background 0.6s, border-color 0.6s, box-shadow 0.4s; }
+    .feat-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--red), transparent); opacity: 0; transition: opacity 0.4s; }
+    @media (hover: hover) { .feat-card:hover { transform: translateY(-4px); border-color: var(--bh); box-shadow: 0 16px 48px rgba(0,0,0,0.08); } .feat-card:hover::after { opacity: 1; } }
+    .feat-icon { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, var(--red), var(--red-d)); display: flex; align-items: center; justify-content: center; margin-bottom: 1.1rem; color: #fff; }
+    .feat-icon .icon { width: 20px; height: 20px; }
+    .feat-title { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 0.5rem; }
+    .feat-desc { font-size: 0.88rem; color: var(--t2); line-height: 1.6; }
+
+    /* ═══ GALLERY ═══ */
+    .gallery-section { padding: clamp(4rem,8vw,7rem) 0; overflow: hidden; }
+    .gallery-track { display: flex; gap: 1.25rem; padding: 0 clamp(1.5rem,4vw,3rem); width: max-content; }
+    .gallery-item { flex-shrink: 0; width: 300px; height: 380px; border-radius: 18px; overflow: hidden; position: relative; background: var(--card); border: 1px solid var(--cardb); cursor: pointer; }
+    .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s var(--ease); }
+    @media (hover: hover) { .gallery-item:hover img { transform: scale(1.08); } .gallery-item:hover { box-shadow: 0 16px 48px rgba(220,38,38,0.08); } }
+    .gallery-item .label { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.2rem; background: linear-gradient(transparent, rgba(0,0,0,0.65)); color: #fff; font-weight: 700; font-size: 1rem; }
+
+    /* ═══ SHOWCASE ═══ */
+    .show-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+    .show-visual { border-radius: 22px; overflow: hidden; aspect-ratio: 4/5; background: var(--card); border: 1px solid var(--cardb); display: flex; align-items: center; justify-content: center; opacity: 0; }
+    .show-visual img { width: 85%; height: auto; filter: drop-shadow(0 20px 60px rgba(220,38,38,0.1)); transition: transform 0.5s var(--ease); }
+    @media (hover: hover) { .show-visual:hover img { transform: scale(1.04); } }
+    .show-text { opacity: 0; }
+    .show-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.2em; color: var(--red); margin-bottom: 0.7rem; }
+    .show-title { font-size: clamp(1.7rem,3.5vw,2.6rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 1.1rem; }
+    .show-desc { font-size: 1rem; color: var(--t2); line-height: 1.7; margin-bottom: 1.3rem; }
+    .show-list { list-style: none; display: flex; flex-direction: column; gap: 0.7rem; }
+    .show-list li { display: flex; align-items: center; gap: 0.6rem; font-size: 0.9rem; color: var(--t2); }
+    .show-list li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--red); flex-shrink: 0; }
+
+    /* ═══ TESTIMONIAL ═══ */
+    .testimonial { padding: clamp(5rem,12vw,10rem) 2rem; text-align: center; background: var(--bg2); transition: background 0.6s; }
+    .test-stars { color: var(--red); font-size: 1.1rem; margin-bottom: 1rem; letter-spacing: 0.15em; display: flex; justify-content: center; gap: 0.15rem; }
+    .test-quote { font-size: clamp(1.3rem,2.8vw,2.2rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.35; max-width: 750px; margin: 0 auto 1.2rem; font-style: italic; }
+    .test-author { color: var(--t2); font-size: 0.9rem; }
+
+    /* ═══ CTA ═══ */
+    .cta { padding: clamp(6rem,15vw,12rem) 2rem; text-align: center; position: relative; overflow: hidden; }
+    .cta-glow { position: absolute; width: 600px; height: 600px; border-radius: 50%; background: var(--red-glow); filter: blur(160px); opacity: 0.15; bottom: -150px; left: 50%; transform: translateX(-50%); }
+    .cta-inner { position: relative; z-index: 2; }
+    .cta-title { font-size: clamp(2.5rem,6vw,5rem); font-weight: 900; letter-spacing: -0.04em; line-height: 1; margin-bottom: 1.2rem; }
+    .cta-sub { font-size: clamp(0.95rem,1.8vw,1.15rem); color: var(--t2); margin-bottom: 2.5rem; max-width: 460px; margin-left: auto; margin-right: auto; line-height: 1.6; }
+    .cta-btn { padding: 1rem 2.8rem; border-radius: 980px; background: var(--red); color: #fff; font-weight: 700; font-size: 1.05rem; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.6rem; transition: transform 0.2s var(--ease-spring), background 0.3s, box-shadow 0.4s; box-shadow: 0 0 0 0 var(--red-glow); }
+    .cta-btn:hover { background: var(--red-d); box-shadow: 0 0 50px 12px var(--red-glow); }
+    .cta-btn:active { transform: scale(0.95); }
+    .cta-btn .arr { transition: transform 0.25s var(--ease); }
+    .cta-btn:hover .arr { transform: translateX(5px); }
+
+    /* ═══ WHATSAPP FAB ═══ */
+    .wa-fab { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 999; width: 56px; height: 56px; border-radius: 50%; background: #25D366; color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 24px rgba(37,211,102,0.35); cursor: pointer; transition: transform 0.25s var(--ease-spring), box-shadow 0.3s; border: none; }
+    .wa-fab:hover { transform: scale(1.08); box-shadow: 0 6px 32px rgba(37,211,102,0.45); }
+    .wa-fab:active { transform: scale(0.92); }
+    .wa-fab .icon { width: 26px; height: 26px; }
+    .wa-pulse { position: absolute; inset: -4px; border-radius: 50%; border: 2px solid #25D366; opacity: 0; animation: waPulse 2s ease-out infinite; }
+    @keyframes waPulse { 0% { transform: scale(1); opacity: 0.6; } 100% { transform: scale(1.5); opacity: 0; } }
+
+    /* ═══ FOOTER ═══ */
+    .footer { padding: 2.5rem 2rem; text-align: center; border-top: 1px solid var(--b); color: var(--t3); font-size: 0.78rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+    .footer a { color: var(--t2); transition: color 0.3s; }
+    .footer a:hover { color: var(--red); }
+    .footer-links { display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center; }
+
+    /* ═══ RESPONSIVE ═══ */
+    @media (max-width: 768px) {
+      .show-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .show-visual { aspect-ratio: 1; }
+      .feat-grid { grid-template-columns: 1fr; }
+      .shop-btn { display: none; }
+      .hero-product img { max-width: 62vw; }
+      .float-badge { display: none; }
+      .cur { display: none; }
+      .gallery-item { width: 260px; height: 340px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loader -->
+  <div class="loader" id="loader">
+    <div class="loader-logo"><img src="logo.png" alt=""></div>
+    <div class="loader-bar"><div class="loader-fill" id="loaderFill"></div></div>
+  </div>
+
+  <!-- Cursor -->
+  <div class="cur" id="cursor"></div>
+
+  <!-- Nav -->
+  <nav class="nav" id="nav">
+    <a href="#" class="nav-logo"><img src="logo.png" alt="REDAPPLEKE"><span>REDAPPLEKE</span></a>
+    <div class="nav-r">
+      <button class="theme-btn" id="themeBtn" aria-label="Toggle theme">
+        <svg class="icon icon-sm sun-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="icon icon-sm moon-icon" viewBox="0 0 24 24" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <a href="https://redappleke-mu.vercel.app" target="_blank" rel="noopener" class="shop-btn">Shop Now <svg class="icon icon-sm" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+    </div>
+  </nav>
+
+  <!-- ═══ HERO ═══ -->
+  <section class="hero" id="hero">
+    <div class="hero-grid"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="particles" id="particles"></div>
+
+    <div class="hero-content">
+      <p class="hero-eye">Kenya's Premium Apple Destination</p>
+      <h1 class="hero-title">
+        <span class="line"><span>Apple products.</span></span>
+        <span class="line"><span><span class="accent">Delivered.</span></span></span>
+        <span class="line"><span>Across Kenya.</span></span>
+      </h1>
+      <p class="hero-sub">Genuine iPhones, iPads, Macs, AirPods and accessories — brought to you with care, speed, and uncompromising quality.</p>
+      <div class="hero-btns">
+        <a href="https://redappleke-mu.vercel.app" target="_blank" rel="noopener" class="btn-p">Shop the Collection <span class="arr"><svg class="icon icon-sm" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span></a>
+        <a href="#features" class="btn-s">Discover More <svg class="icon icon-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></a>
+      </div>
+    </div>
+
+    <div class="hero-product" id="heroProduct">
+      <img src="product-1.png" alt="REDAPPLEKE Products">
+      <div class="float-badge b1"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Certified</div>
+      <div class="float-badge b2"><svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg> Fast Delivery</div>
+      <div class="float-badge b3"><svg class="icon icon-sm" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> 4.9 Rating</div>
+    </div>
+
+    <div class="scroll-cue">Scroll <svg class="icon icon-sm" viewBox="0 0 24 24" style="margin-top:2px"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
+  </section>
+
+  <!-- ═══ STATEMENT ═══ -->
+  <section class="statement" id="statementSection">
+    <div class="statement-bg">RED</div>
+    <p class="statement-text" id="statementText">
+      We believe everyone in Kenya deserves access to <span class="red">genuine Apple technology</span> — not grey imports, not questionable warranties. Just the real thing, delivered to your door.
+    </p>
+  </section>
+
+  <!-- ═══ MARQUEE ═══ -->
+  <div class="marquee-wrap">
+    <div class="marquee" id="marquee">
+      <span>iPhone 17 Pro Max <span class="dot"></span></span>
+      <span>MacBook Air <span class="dot"></span></span>
+      <span>iPad Pro <span class="dot"></span></span>
+      <span>AirPods Pro <span class="dot"></span></span>
+      <span>Apple Watch <span class="dot"></span></span>
+      <span>Mac Studio <span class="dot"></span></span>
+      <span>Vision Pro <span class="dot"></span></span>
+      <span>Accessories <span class="dot"></span></span>
+      <span>iPhone 17 Pro Max <span class="dot"></span></span>
+      <span>MacBook Air <span class="dot"></span></span>
+      <span>iPad Pro <span class="dot"></span></span>
+      <span>AirPods Pro <span class="dot"></span></span>
+      <span>Apple Watch <span class="dot"></span></span>
+      <span>Mac Studio <span class="dot"></span></span>
+      <span>Vision Pro <span class="dot"></span></span>
+      <span>Accessories <span class="dot"></span></span>
+    </div>
+  </div>
+
+  <!-- ═══ STATS ═══ -->
+  <section class="stats">
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card"><div class="stat-num" data-target="100" data-suffix="%">0%</div><div class="stat-lbl">Genuine Products</div></div>
+      <div class="stat-card"><div class="stat-num" data-target="47" data-suffix="">0</div><div class="stat-lbl">Counties Delivered</div></div>
+      <div class="stat-card"><div class="stat-num" data-target="24" data-suffix="h">0h</div><div class="stat-lbl">Express Delivery</div></div>
+      <div class="stat-card"><div class="stat-num" data-target="12" data-suffix="K+">0K+</div><div class="stat-lbl">Happy Customers</div></div>
+    </div>
+  </section>
+
+  <!-- ═══ FEATURES ═══ -->
+  <section class="sec-pad" id="features">
+    <div class="sec-hdr">
+      <p class="sec-eye">Why REDAPPLEKE</p>
+      <h2 class="sec-title">Built for Kenya.<br>Designed for you.</h2>
+    </div>
+    <div class="feat-grid" id="featGrid">
+      <div class="feat-card">
+        <div class="feat-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3 class="feat-title">Apple Certified</h3>
+        <p class="feat-desc">Every product sourced through official Apple channels. Full manufacturer warranty included.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg class="icon" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+        <h3 class="feat-title">Nationwide Delivery</h3>
+        <p class="feat-desc">From Nairobi to Mombasa, Kisumu to Nakuru — we deliver across all 47 counties.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg class="icon" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+        <h3 class="feat-title">M-Pesa Payments</h3>
+        <p class="feat-desc">Pay with M-Pesa, cards, or bank transfer. Secure checkout with instant confirmation.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg class="icon" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></div>
+        <h3 class="feat-title">Easy Returns</h3>
+        <p class="feat-desc">Changed your mind? Hassle-free returns within 14 days of delivery.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <h3 class="feat-title">WhatsApp Support</h3>
+        <p class="feat-desc">Got questions? Chat with our team on WhatsApp. Real humans, real fast.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg class="icon" viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
+        <h3 class="feat-title">Gift Wrapping</h3>
+        <p class="feat-desc">Sending a gift? We'll wrap it beautifully. Add a personal message at checkout.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ GALLERY ═══ -->
+  <section class="gallery-section">
+    <div class="sec-hdr" style="padding: 0 2rem; margin-bottom: 2.5rem;">
+      <p class="sec-eye">The Collection</p>
+      <h2 class="sec-title">Every Apple product.<br>One destination.</h2>
+    </div>
+    <div class="gallery-track" id="galleryTrack">
+      <div class="gallery-item"><img src="apple.jpg" alt=""><div class="label">iPhone 17 Series</div></div>
+      <div class="gallery-item"><img src="macbook.jpeg" alt=""><div class="label">MacBook Air</div></div>
+      <div class="gallery-item"><img src="ipad.jpeg" alt=""><div class="label">iPad Pro</div></div>
+      <div class="gallery-item"><img src="airpods.png" alt=""><div class="label">AirPods Pro</div></div>
+      <div class="gallery-item"><img src="hero-bg.png" alt=""><div class="label">Apple Watch</div></div>
+      <div class="gallery-item"><img src="airpods.png" alt=""><div class="label">Accessories</div></div>
+      <div class="gallery-item"><img src="hero-bg.png" alt=""><div class="label">iPhone 17 Series</div></div>
+      <div class="gallery-item"><img src="macbook.jpeg" alt=""><div class="label">MacBook Air</div></div>
+      <div class="gallery-item"><img src="hero-bg.png" alt=""><div class="label">iPad Pro</div></div>
+      <div class="gallery-item"><img src="product-1.png" alt=""><div class="label">AirPods Pro</div></div>
+      <div class="gallery-item"><img src="watch.png" alt=""><div class="label">Apple Watch</div></div>
+      <div class="gallery-item"><img src="product-1.png" alt=""><div class="label">Accessories</div></div>
+    </div>
+  </section>
+
+  <!-- ═══ SHOWCASE ═══ -->
+  <section class="sec-pad">
+    <div class="show-grid">
+      <div class="show-visual"><img src="hero-bg.png" alt="REDAPPLEKE Products"></div>
+      <div class="show-text">
+        <p class="show-label">The Collection</p>
+        <h2 class="show-title">Every Apple product.<br>One destination.</h2>
+        <p class="show-desc">From the latest iPhone to the most powerful MacBook Pro, we curate the complete Apple ecosystem for the Kenyan market.</p>
+        <ul class="show-list">
+          <li>iPhone 17 Series — All colors, all storage</li>
+          <li>iPad Pro & iPad Air — M4 chip performance</li>
+          <li>MacBook Air & Pro — Apple Silicon power</li>
+          <li>AirPods Pro 3 — Immersive audio</li>
+          <li>Apple Watch Ultra 3 — Adventure ready</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ TESTIMONIAL ═══ -->
+  <section class="testimonial">
+    <div class="test-stars">
+      <svg class="icon" viewBox="0 0 24 24" style="fill:var(--red);stroke:none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <svg class="icon" viewBox="0 0 24 24" style="fill:var(--red);stroke:none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <svg class="icon" viewBox="0 0 24 24" style="fill:var(--red);stroke:none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <svg class="icon" viewBox="0 0 24 24" style="fill:var(--red);stroke:none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <svg class="icon" viewBox="0 0 24 24" style="fill:var(--red);stroke:none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    </div>
+    <p class="test-quote">"Finally, a place in Kenya where I can buy genuine Apple products without worrying about fakes. REDAPPLEKE delivered my iPhone in 24 hours!"</p>
+    <p class="test-author">— Sarah M., Nairobi</p>
+  </section>
+
+  <!-- ═══ CTA ═══ -->
+  <section class="cta">
+    <div class="cta-glow"></div>
+    <div class="cta-inner">
+      <h2 class="cta-title">Ready to upgrade?</h2>
+      <p class="cta-sub">Browse the full collection. Find your next Apple device. Delivered across Kenya with care.</p>
+      <a href="https://redappleke-mu.vercel.app" target="_blank" rel="noopener" class="cta-btn">Start Shopping <span class="arr"><svg class="icon icon-sm" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span></a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>© 2026 REDAPPLEKE. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="https://redappleke-mu.vercel.app" target="_blank" rel="noopener">Visit Store</a>
+      <a href="https://wa.me/254718398081?text=Hi%20REDAPPLEKE!%20I%27d%20like%20to%20know%20more%20about%20your%20products." target="_blank" rel="noopener">WhatsApp Us</a>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Service</a>
+    </div>
+  </footer>
+
+  <!-- WhatsApp FAB -->
+  <a href="https://wa.me/254718398081?text=Hi%20REDAPPLEKE!%20I%27d%20like%20to%20know%20more%20about%20your%20products." target="_blank" rel="noopener" class="wa-fab" aria-label="Chat on WhatsApp">
+    <span class="wa-pulse"></span>
+    <svg class="icon" viewBox="0 0 24 24" style="width:26px;height:26px;fill:#fff;stroke:none"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  </a>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+    /* ═══ LOADER ═══ */
+    const loader = document.getElementById('loader');
+    const loaderFill = document.getElementById('loaderFill');
+    gsap.to(loaderFill, { width: '100%', duration: 1.2, ease: 'power2.inOut', onComplete: () => {
+      gsap.to(loader, { opacity: 0, duration: 0.5, ease: 'power2.out', onComplete: () => { loader.style.display = 'none'; initAnimations(); } });
+    }});
+
+    /* ═══ THEME ═══ */
+    const html = document.documentElement;
+    const sunIcon = document.querySelector('.sun-icon');
+    const moonIcon = document.querySelector('.moon-icon');
+    function setTheme(t) {
+      html.setAttribute('data-theme', t);
+      sunIcon.style.display = t === 'dark' ? '' : 'none';
+      moonIcon.style.display = t === 'dark' ? 'none' : '';
+      localStorage.setItem('rak-theme', t);
+    }
+    document.getElementById('themeBtn').addEventListener('click', () => setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+    const saved = localStorage.getItem('rak-theme');
+    if (saved) setTheme(saved);
+
+    /* ═══ CURSOR ═══ */
+    const cur = document.getElementById('cursor');
+    let mx = 0, my = 0, cx = 0, cy = 0;
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+    (function animCur() { cx += (mx - cx) * 0.12; cy += (my - cy) * 0.12; cur.style.left = cx + 'px'; cur.style.top = cy + 'px'; requestAnimationFrame(animCur); })();
+    document.querySelectorAll('a, button, .feat-card, .gallery-item, .cta-btn').forEach(el => {
+      el.addEventListener('mouseenter', () => cur.classList.add('big'));
+      el.addEventListener('mouseleave', () => cur.classList.remove('big'));
+    });
+
+    /* ═══ PARTICLES ═══ */
+    const pEl = document.getElementById('particles');
+    for (let i = 0; i < 25; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.width = p.style.height = (1.5 + Math.random() * 2.5) + 'px';
+      pEl.appendChild(p);
+    }
+
+    /* ═══ NAV SCROLL ═══ */
+    window.addEventListener('scroll', () => document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 50), { passive: true });
+
+    /* ═══ MAIN ANIMATIONS (after loader) ═══ */
+    function initAnimations() {
+      const tl = gsap.timeline();
+
+      // Hero entrance
+      tl.to('.hero-eye', { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, 0.1)
+        .to('.hero-title .line span', { y: 0, duration: 1, ease: 'expo.out', stagger: 0.12 }, 0.2)
+        .to('.hero-sub', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, 0.7)
+        .to('.hero-btns', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, 0.9)
+        .to('.hero-product', { opacity: 1, y: 0, scale: 1, rotationX: 0, duration: 1.2, ease: 'expo.out' }, 1.0)
+        .to('.float-badge', { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: 'back.out(1.7)', stagger: 0.15 }, 1.4)
+        .to('.scroll-cue', { opacity: 1, duration: 0.6 }, 1.6);
+
+      // Particles float
+      gsap.utils.toArray('.particle').forEach(p => {
+        gsap.to(p, {
+          y: -(window.innerHeight + 50),
+          opacity: 0.5,
+          duration: 8 + Math.random() * 10,
+          repeat: -1,
+          delay: Math.random() * 8,
+          ease: 'none',
+          onRepeat: function() { gsap.set(p, { y: 0, x: 0, opacity: 0 }); }
+        });
+        gsap.to(p, { x: '+=' + (Math.random() * 60 - 30), duration: 4 + Math.random() * 4, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+      });
+
+      // Orb floating
+      gsap.to('.orb-1', { y: -30, scale: 1.08, duration: 6, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+      gsap.to('.orb-2', { y: -20, x: 10, scale: 1.05, duration: 8, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+      gsap.to('.orb-3', { y: -25, x: 15, scale: 1.06, duration: 10, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+
+      // Marquee
+      const marquee = document.getElementById('marquee');
+      gsap.to(marquee, { x: () => -(marquee.scrollWidth / 2), duration: 35, repeat: -1, ease: 'none' });
+
+      // Statement word reveal
+      const stmtEl = document.getElementById('statementText');
+      if (stmtEl) {
+        const origHTML = stmtEl.innerHTML;
+        let out = '';
+        let inTag = false;
+        for (let i = 0; i < origHTML.length; i++) {
+          if (origHTML[i] === '<') { inTag = true; out += origHTML[i]; continue; }
+          if (origHTML[i] === '>') { inTag = false; out += origHTML[i]; continue; }
+          if (inTag) { out += origHTML[i]; continue; }
+          out += origHTML[i];
+        }
+        // Rebuild with word spans
+        let result = '';
+        const parts = origHTML.split(/(<[^>]+>)/);
+        parts.forEach(part => {
+          if (part.startsWith('<')) { result += part; return; }
+          const words = part.split(/(\s+)/);
+          words.forEach(w => {
+            if (/^\s+$/.test(w)) { result += w; return; }
+            if (w.trim()) result += `<span class="word">${w}</span>`;
+          });
+        });
+        stmtEl.innerHTML = result;
+
+        ScrollTrigger.create({
+          trigger: '#statementSection',
+          start: 'top 70%',
+          once: true,
+          onEnter: () => {
+            gsap.to(stmtEl.querySelectorAll('.word'), {
+              opacity: 1, y: 0, duration: 0.5, stagger: 0.04, ease: 'power3.out'
+            });
+          }
+        });
+      }
+
+      // Stats counter
+      ScrollTrigger.create({
+        trigger: '#statsGrid',
+        start: 'top 75%',
+        once: true,
+        onEnter: () => {
+          gsap.to('.stat-card', { opacity: 1, y: 0, scale: 1, duration: 0.6, stagger: 0.1, ease: 'back.out(1.4)' });
+          document.querySelectorAll('.stat-num').forEach(el => {
+            const target = parseInt(el.dataset.target);
+            const suffix = el.dataset.suffix || '';
+            const obj = { val: 0 };
+            gsap.to(obj, { val: target, duration: 2, ease: 'power2.out', onUpdate: () => { el.textContent = Math.round(obj.val) + suffix; } });
+          });
+        }
+      });
+
+      // Feature cards
+      ScrollTrigger.create({
+        trigger: '#featGrid',
+        start: 'top 75%',
+        once: true,
+        onEnter: () => gsap.to('.feat-card', { opacity: 1, y: 0, duration: 0.6, stagger: 0.08, ease: 'power3.out' })
+      });
+
+      // Gallery horizontal scroll
+      const track = document.getElementById('galleryTrack');
+      if (track) {
+        const halfW = track.scrollWidth / 2;
+        gsap.to(track, { x: -halfW, ease: 'none', scrollTrigger: {
+          trigger: '.gallery-section', start: 'top bottom', end: 'bottom top', scrub: 1
+        }});
+      }
+
+      // Showcase
+      ScrollTrigger.create({
+        trigger: '.show-grid', start: 'top 70%', once: true,
+        onEnter: () => {
+          gsap.to('.show-visual', { opacity: 1, x: 0, duration: 0.9, ease: 'expo.out' });
+          gsap.to('.show-text', { opacity: 1, x: 0, duration: 0.9, ease: 'expo.out', delay: 0.15 });
+        }
+      });
+
+      // Testimonial
+      ScrollTrigger.create({
+        trigger: '.testimonial', start: 'top 75%', once: true,
+        onEnter: () => gsap.from('.testimonial', { opacity: 0, y: 40, duration: 0.8, ease: 'power3.out' })
+      });
+
+      // CTA
+      ScrollTrigger.create({
+        trigger: '.cta', start: 'top 75%', once: true,
+        onEnter: () => gsap.from('.cta-inner', { opacity: 0, y: 50, scale: 0.96, duration: 1, ease: 'expo.out' })
+      });
+
+      // Hero parallax on scroll
+      gsap.to('.hero-content', {
+        y: -80, opacity: 0, ease: 'none',
+        scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 1 }
+      });
+      gsap.to('.hero-product', {
+        y: 60, scale: 0.9, opacity: 0, ease: 'none',
+        scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 1 }
+      });
+
+      // Mouse parallax on hero
+      document.addEventListener('mousemove', e => {
+        if (window.scrollY > window.innerHeight) return;
+        const x = (e.clientX / window.innerWidth - 0.5);
+        const y = (e.clientY / window.innerHeight - 0.5);
+        gsap.to('.hero-content', { x: x * 15, y: y * 10, duration: 1, ease: 'power2.out' });
+        gsap.to('.hero-product', { x: x * -20, y: y * -15, duration: 1.2, ease: 'power2.out' });
+        gsap.to('.orb-1', { x: x * 30, duration: 2, ease: 'power2.out' });
+      });
+    }
+
+    /* ═══ SMOOTH ANCHOR ═══ */
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        const t = document.querySelector(a.getAttribute('href'));
+        if (t) gsap.to(window, { scrollTo: { y: t, offsetY: 60 }, duration: 1, ease: 'power3.inOut' });
+      });
+    });
+  </script>
+</body>
+</html>
